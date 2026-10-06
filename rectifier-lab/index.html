@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rectifier Lab</title>
+<link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="wrap">
+<h1>Rectifier Lab</h1><p class="sub">Diode and thyristor rectifiers, 1&phi; and 3&phi;, half and full wave, with an R-L load. 50 Hz, ideal devices, steady-state time-domain simulation.</p>
+<div class="tabs" id="tabs"></div>
+<div class="grid">
+<div class="col">
+<div class="card"><h2>Schematic</h2><div id="sch"></div><p class="info" id="info"></p><p class="info"><b style="color:var(--ac)">Orange</b> = path carrying current right now; moving dashes show the current direction. Drag the slider or press Play.</p></div>
+<div class="card"><h2>Parameters</h2>
+<div class="tabs" style="margin-bottom:4px"><button id="bd">Diode</button><button id="bt" class="on">Thyristor</button></div>
+<div class="row"><label>Firing &alpha;</label><input type="range" id="al" min="0" max="180" step="1" value="30"><output></output></div>
+<div class="row"><label>Vm (phase pk)</label><input type="range" id="vm" min="50" max="600" step="5" value="325"><output></output></div>
+<div class="row"><label>R</label><input type="range" id="r" min="1" max="100" step="1" value="10"><output></output></div>
+<div class="row"><label>L</label><input type="range" id="l" min="0" max="1000" step="5" value="50"><output></output></div>
+<div class="tabs"><button id="pr">R load (L=0)</button><button id="pl">Highly inductive</button></div></div>
+<div class="card"><h2>Steady-state metrics</h2><div class="m" id="mt"></div></div>
+</div>
+<div class="card"><h2>Waveforms</h2><canvas id="cv"></canvas>
+<div class="ctl"><button id="pp">Pause</button><input type="range" id="sc" min="0" max="360" step="1" value="0"></div><div id="ro"></div></div>
+</div></div>
+<script src="app.js"></script>
+</body></html>
