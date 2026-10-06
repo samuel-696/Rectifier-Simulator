@@ -19,7 +19,7 @@
 <div class="tabs"><button id="pr">R load (L=0)</button><button id="pl">Highly inductive</button></div></div>
 <div class="card"><h2>Steady-state metrics</h2><div class="m" id="mt"></div></div>
 </div>
-<div class="card"><h2>Waveforms</h2><canvas id="cv"></canvas>
+<div class="card"><h2>Waveforms</h2><div class="tb"><button id="zi" title="Zoom in">+</button><button id="zo" title="Zoom out">&minus;</button><button id="vl" title="Pan left">&#9664;</button><button id="vr" title="Pan right">&#9654;</button><button id="zr">Reset</button><label><input type="checkbox" id="fy"> Auto-fit Y</label><span id="vw"></span></div><canvas id="cv"></canvas><p class="hint">Scroll to zoom, drag to pan, double-click to reset. All graphs share one time axis. Zoom out past 360&deg; to see repeated cycles.</p>
 <div class="ctl"><button id="pp">Pause</button><input type="range" id="sc" min="0" max="360" step="1" value="0"></div><div id="ro"></div></div>
 </div></div>
 <script src="app.js"></script>

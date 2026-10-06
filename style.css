@@ -29,3 +29,7 @@ canvas{width:100%;display:block}
 .fl{fill:none;stroke:var(--ac);stroke-width:3;stroke-linejoin:round;stroke-dasharray:7 6;animation:fw .5s linear infinite}
 @keyframes fw{to{stroke-dashoffset:-13}}
 @media(prefers-reduced-motion:reduce){.fl{animation:none}}
+.tb{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:8px}
+.tb label{display:flex;gap:4px;align-items:center;cursor:pointer}.tb span{color:var(--mut);font-size:12px;margin-left:auto}
+#cv{cursor:grab;touch-action:pan-y}#cv:active{cursor:grabbing}
+.hint{color:var(--mut);font-size:12px;margin:6px 0 0}
