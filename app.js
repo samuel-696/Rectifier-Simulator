@@ -1,9 +1,9 @@
 const $=s=>document.querySelector(s),D=Math.PI/180,SQ=Math.sqrt(3),PI=Math.PI;
 const T={
-h1:{t:'1φ half-wave',N:1,sp:360,p0:0,ph:1,u:(k,t)=>Math.sin(t),on:[['1']],fl:()=>'M50 115V50H330V95M330 165V210H50V145',info:'One pulse per cycle. Textbook Vdc = Vm(1+cosα)/2π for an R load. With L, the device keeps conducting past 180° until current falls to zero (extinction angle β).'},
-f1:{t:'1φ full-wave (bridge)',N:2,sp:180,p0:0,ph:1,u:(k,t)=>k?-Math.sin(t):Math.sin(t),on:[['1','2'],['3','4']],fl:k=>k?'M195 130H260L180 60H340V95M340 165V200H180L100 130H165':'M165 130H100L180 60H340V95M340 165V200H180L260 130H195',info:'Two pulses per cycle. With continuous conduction Vdc = (2Vm/π)cosα. For α>90° and large L the bridge works as a line-commutated inverter (negative Vdc).'},
-h3:{t:'3φ half-wave',N:3,sp:120,p0:30,ph:3,u:(k,t)=>Math.sin(t-2*PI*k/3),on:[['1'],['2'],['3']],fl:k=>{const x=70+70*k;return `M${x} 145V50H340V95M340 165V215H${x}V175`},info:'Three pulses per cycle; each device conducts up to 120°. Natural firing point is 30° after the phase zero-crossing. CCM: Vdc = (3√3·Vm/2π)cosα.'},
-f3:{t:'3φ full-wave (6-pulse bridge)',N:6,sp:60,p0:30,ph:3,u:(k,t)=>SQ*Math.sin(t+PI/6-PI*k/3),on:[['1','6'],['1','2'],['3','2'],['3','4'],['5','4'],['5','6']],fl:k=>{const p='aabbcc'[k],n='bcca ab'.replace(' ','')[k];return F3.o[p]+`V30H370V115M370 185V270H${F3.x[n]}V${F3.y[n]}`+F3.i[n]},info:'Six pulses per cycle, output follows the line-line voltage envelope (grey). CCM: Vdc = (3√3·Vm/π)cosα ≈ 1.654·Vm·cosα. Each pair conducts 60° (CCM).'}};
+h1:{t:'1φ half-wave',N:1,p:1,sp:360,p0:0,ph:1,u:(k,t)=>Math.sin(t),on:[['1']],fl:()=>'M50 115V50H330V95M330 165V210H50V145',info:'One pulse per cycle. Textbook Vdc = Vm(1+cosα)/2π for an R load. With L, the device keeps conducting past 180° until current falls to zero (extinction angle β).'},
+f1:{t:'1φ full-wave (bridge)',N:2,p:2,sp:180,p0:0,ph:1,u:(k,t)=>k?-Math.sin(t):Math.sin(t),on:[['1','2'],['3','4']],fl:k=>k?'M195 130H260L180 60H340V95M340 165V200H180L100 130H165':'M165 130H100L180 60H340V95M340 165V200H180L260 130H195',info:'Two pulses per cycle. With continuous conduction Vdc = (2Vm/π)cosα. For α>90° it can only run as a line-commutated inverter (negative Vdc) if the load has an EMF E<0, e.g. a regenerating DC machine.'},
+h3:{t:'3φ half-wave',N:3,p:3,sp:120,p0:30,ph:3,u:(k,t)=>Math.sin(t-2*PI*k/3),on:[['1'],['2'],['3']],fl:k=>{const x=70+70*k;return `M${x} 145V50H340V95M340 165V215H${x}V175`},info:'Three pulses per cycle; each device conducts up to 120°. Natural firing point is 30° after the phase zero-crossing. CCM: Vdc = (3√3·Vm/2π)cosα.'},
+f3:{t:'3φ full-wave (6-pulse bridge)',N:6,p:6,sp:60,p0:30,ph:3,u:(k,t)=>SQ*Math.sin(t+PI/6-PI*k/3),on:[['1','6'],['1','2'],['3','2'],['3','4'],['5','4'],['5','6']],fl:k=>{const p='aabbcc'[k],n='bcca ab'.replace(' ','')[k];return F3.o[p]+`V30H370V115M370 185V270H${F3.x[n]}V${F3.y[n]}`+F3.i[n]},info:'Six pulses per cycle, output follows the line-line voltage envelope (grey). CCM: Vdc = (3√3·Vm/π)cosα ≈ 1.654·Vm·cosα. Each pair conducts 60° (CCM).'}};
 const F3={o:{a:'M60 150H150',b:'M60 128H145q5-9 10 0H220',c:'M60 106H145q5-9 10 0H215q5-9 10 0H290'},i:{a:'H60',b:'H155q-5-9 -10 0H60',c:'H225q-5-9 -10 0H155q-5-9 -10 0H60'},x:{a:150,b:220,c:290},y:{a:150,b:128,c:106}};
 const Q=8,mod=(i,n)=>((i%n)+n)%n;let view={a:0,b:360},fitY=false;
 let topo='f3',thy=true,res,cur=0,play=true,dirty=true;
@@ -17,33 +17,35 @@ if(topo=='f1')s=`<svg viewBox="0 0 400 250">${wp('M100 130L180 60L260 130L180 20
 if(topo=='h3')s=`<svg viewBox="0 0 400 240">${wp('M70 145V50M140 145V50M210 145V50M70 50H340V95M340 165V215H70M70 175V215M140 175V215M210 175V215')}${sc(70,160,'a','sc0')}${sc(140,160,'b','sc1')}${sc(210,160,'c','sc2')}${ld(340,130)}${[1,2,3].map((i,j)=>dv(i,70+70*j,100,-90,84+70*j,104)).join('')}</svg>`;
 if(topo=='f3')s=`<svg viewBox="0 0 420 290">${wp('M150 30V270M220 30V270M290 30V270M150 30H370V115M370 185V270H150M60 150H150M60 128H145q5-9 10 0H220M60 106H145q5-9 10 0H215q5-9 10 0H290')}<rect class="w hb" id="sc0" x="14" y="88" width="46" height="74" rx="4" fill="var(--card)"/><text class="t" x="37" y="130" text-anchor="middle">3φ AC</text><text class="t" x="66" y="146">a</text><text class="t" x="66" y="124">b</text><text class="t" x="66" y="102">c</text>${[[150,150],[220,128],[290,106]].map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--fg)"/>`).join('')}${ld(370,150)}${[[1,150],[3,220],[5,290]].map(p=>dv(p[0],p[1],75,-90,p[1]+14,79)).join('')}${[[4,150],[6,220],[2,290]].map(p=>dv(p[0],p[1],210,-90,p[1]+14,214)).join('')}</svg>`;
 s=s.replace(/(<svg[^>]*>)(<path[^>]*\/>)/,'$1$2<g id="fg"></g>');$('#sch').innerHTML=s;$('#info').textContent=T[topo].info}
-function sim(){const o=T[topo],Vm=+$('#vm').value,R=+$('#r').value,L=+$('#l').value/1000,al=thy?+$('#al').value:0,M=360*Q,C=100,dt=1/(M*50),a=L>1e-7?Math.exp(-R*dt/L):0;
+const IDEAL=(t,V,a)=>{const c=Math.cos(a*D);return{h1:V*(1+c)/(2*PI),f1:2*V/PI*c,h3:3*SQ*V/(2*PI)*c,f3:3*SQ*V/PI*c}[t]};
+const RLOAD=(t,V,a)=>{const c=Math.cos(a*D);return{h1:V*(1+c)/(2*PI),f1:V*(1+c)/PI,h3:a>=150?0:a<=30?3*SQ*V/(2*PI)*c:3*V/(2*PI)*(1+Math.cos((a+30)*D)),f3:a>=120?0:a<=60?3*SQ*V/PI*c:3*SQ*V/PI*(1+Math.cos((a+60)*D))}[t]};
+function sim(){const o=T[topo],Vm=+$('#vm').value,R=+$('#r').value,L=+$('#l').value/1000,E=+$('#e').value,al=thy?+$('#al').value:0,M=360*Q,C=100,dt=1/(M*50),a=L>1e-7?Math.exp(-R*dt/L):0,W=Math.min(o.sp,180)*Q;
 const fi=[];for(let k=0;k<o.N;k++)fi.push(Math.round(((o.p0+al+o.sp*k)%360)*Q)%M);
-const c0=Math.cos(al*D),g0=({h1:Vm*(1+c0)/(2*PI),f1:2*Vm/PI*c0,h3:3*SQ*Vm/(2*PI)*c0,f3:3*SQ*Vm/PI*c0})[topo];let st=-1,i=0;if(g0>0&&L>1e-6){i=g0/R;let b=-1e9;for(let k=0;k<o.N;k++){const u=o.u(k,0);if(u>b){b=u;st=k}}}
+const g0=IDEAL(topo,Vm,al);let st=-1,i=0;
+if(L>1e-6&&(g0-E)/R>0){i=(g0-E)/R;let b=-1e9;for(let k=0;k<o.N;k++){const u=o.u(k,0);if(u>b){b=u;st=k}}}
 const vo=new Float32Array(M),io=new Float32Array(M),sk=new Int8Array(M);
 for(let n=1;n<=M*C;n++){const m=n%M,t=m/Q*D;
-for(let k=0;k<o.N;k++)if(fi[k]===m&&st!==k){const uc=st<0?0:Vm*o.u(st,t);if(Vm*o.u(k,t)>=uc-1e-6)st=k}
-let v=0;if(st>=0){const u=Vm*o.u(st,t);i=u/R+(i-u/R)*a;if(i<0){i=0;st=-1}else v=u}
+for(let k=0;k<o.N;k++)if(st!==k&&(!thy||mod(m-fi[k],M)<W)){const uc=st<0?E:Vm*o.u(st,t);if(Vm*o.u(k,t)>=uc-1e-7)st=k}
+let v=E;if(st>=0){const u=Vm*o.u(st,t),e=(u-E)/R;i=e+(i-e)*a;if(i<-1e-9){i=0;st=-1}else{if(i<0)i=0;v=u}}
 if(n>M*(C-1)){vo[m]=v;io[m]=i;sk[m]=st}}
-const mean=f=>f.reduce((s,x)=>s+x,0)/M,rms=f=>Math.sqrt(f.reduce((s,x)=>s+x*x,0)/M);
-const vdc=mean(vo),vr=rms(vo),idc=mean(io),ir=rms(io),dcm=sk.some(x=>x<0),c=Math.cos(al*D);
-const th={h1:L<1e-6?Vm*(1+c)/(2*PI):null,f1:2*Vm/PI*c,h3:3*SQ*Vm/(2*PI)*c,f3:3*SQ*Vm/PI*c}[topo];
-res={vo,io,sk,fi,Vm,al,vdc,vr,idc,ir,dcm,th};
-const f=(x,u,d=1)=>isFinite(x)?x.toFixed(d)+' '+u:'—';
-const rf=Math.abs(vdc)>1e-3?Math.sqrt(Math.max(0,(vr/vdc)**2-1)):NaN;
-const mm=[['Vdc',f(vdc,'V')],['Vrms',f(vr,'V')],['Idc',f(idc,'A',2)],['Irms',f(ir,'A',2)],['Ripple factor',isFinite(rf)?rf.toFixed(3):'—'],['Conduction',dcm?'Discontinuous':'Continuous'],['Textbook Vdc',th==null?'—':f(th,'V')],['Pdc (Vdc·Idc)',f(vdc*idc,'W',0)]];
+const mean=f=>f.reduce((q,x)=>q+x,0)/M,rms=f=>Math.sqrt(f.reduce((q,x)=>q+x*x,0)/M);
+const vdc=mean(vo),vr=rms(vo),idc=mean(io),ir=rms(io),dcm=sk.some(x=>x<0);
+const th=!dcm?(o.p>1?IDEAL(topo,Vm,al):null):(L<1e-6&&E==0?RLOAD(topo,Vm,al):null);
+res={vo,io,sk,fi,Vm,E,al,vdc,vr,idc,ir,dcm,th};
+const f=(x,u,d=1)=>isFinite(x)?x.toFixed(d)+' '+u:'—',ok=Math.abs(vdc)>1e-3,rf=ok?Math.sqrt(Math.max(0,(vr/vdc)**2-1)):NaN;
+const mm=[['Vdc',f(vdc,'V')],['Vrms',f(vr,'V')],['Idc',f(idc,'A',2)],['Irms',f(ir,'A',2)],['Form factor Vrms/Vdc',ok?(vr/vdc).toFixed(3):'—'],['Ripple factor',ok?rf.toFixed(3):'—'],['Pdc = Vdc·Idc',f(vdc*idc,'W',0)],['Ripple frequency',o.p*50+' Hz'],['Conduction',dcm?'Discontinuous':'Continuous'],['Textbook Vdc'+(th==null?'':!dcm?' (CCM)':' (R load)'),th==null?'—':f(th,'V')]];
 $('#mt').innerHTML=mm.map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');dirty=true}
 function hl(){document.querySelectorAll('.d.on,.hb.on').forEach(e=>e.classList.remove('on'));const o=T[topo],fg=$('#fg'),k=res.sk[Math.round(cur*Q)%(360*Q)];fg.innerHTML='';if(k<0)return;
 fg.innerHTML=[].concat(o.fl(k)).map(d=>`<path class="fl" d="${d}"/>`).join('');
 o.on[k].forEach(i=>{const e=$('#d'+i);e&&e.classList.add('on')});$('#ld').classList.add('on');$(topo=='h3'?'#sc'+k:'#sc0').classList.add('on')}
-function geom(){return{X0:54,X1:$('#cv').parentNode.clientWidth-34}}
+function geom(){return{X0:54,X1:$('#cv').parentNode.clientWidth-46}}
 function draw(){
 const cv=$('#cv'),w=cv.parentNode.clientWidth-24,h=Math.max(500,Math.min(720,w*.85)),r=devicePixelRatio||1;
 cv.width=w*r;cv.height=h*r;cv.style.height=h+'px';const g=cv.getContext('2d');g.scale(r,r);
 const cs=getComputedStyle(document.documentElement),col=n=>cs.getPropertyValue(n).trim(),fg=col('--fg'),mut=col('--mut'),ln=col('--ln'),ac=col('--ac'),pc=[col('--a'),col('--b'),col('--c')],o=T[topo],M=360*Q,pre=thy?'T':'D';
 const{X0,X1}=geom(),A=view.a,B=view.b,span=B-A,x=d=>X0+(X1-X0)*(d-A)/span;
 g.font='11px system-ui,sans-serif';
-const Vm=res.Vm,vmax=Vm*(topo=='f3'?1.8:1.15),gap=12,strip=30,axis=20,avail=h-strip-axis-gap*3-6,hs=[.3,.36,.34].map(f=>f*avail);
+const Vm=res.Vm,vmax=Math.max(Vm*(topo=='f3'?1.8:1.15),Math.abs(res.E)*1.1),gap=12,strip=30,axis=20,avail=h-strip-axis-gap*3-6,hs=[.3,.36,.34].map(f=>f*avail);
 const i0=Math.floor(A*Q),i1=Math.ceil(B*Q),sd=Math.max(1,Math.floor((i1-i0)/(2*(X1-X0))));
 let vl=1e9,vh=-1e9,il=1e9,ih=-1e9,imx=.1;
 for(let i=i0;i<=i1;i+=sd){const m=mod(i,M),a=res.vo[m],b=res.io[m];if(a<vl)vl=a;if(a>vh)vh=a;if(b<il)il=b;if(b>ih)ih=b}
@@ -53,36 +55,42 @@ const P=[{t:'Source (V)',lo:-vmax,hi:vmax},{t:'vo (V)',lo:-vmax,hi:vmax},{t:'io 
 if(fitY){[P[1].lo,P[1].hi]=fit(vl,vh);[P[2].lo,P[2].hi]=fit(il,ih)}
 const steps=[1,2,5,10,15,30,45,60,90,180,360],tk=steps.find(q=>span/q<=12)||360,ticks=[];for(let d=Math.ceil(A/tk-1e-9)*tk;d<=B+1e-9;d+=tk)ticks.push(d);
 const nf=v=>Math.abs(v)<1e-9?'0':Math.abs(v)>=100?v.toFixed(0):Math.abs(v)>=10?v.toFixed(1):v.toFixed(2);
+const bg=col('--card'),lab=(t,X,Y,al)=>{g.textAlign=al;const tw=g.measureText(t).width;g.globalAlpha=.85;g.fillStyle=bg;g.fillRect(al=='left'?X-3:X-tw-3,Y-11,tw+6,15);g.globalAlpha=1;g.fillStyle=mut;g.fillText(t,X,Y)};
 let y=6;
 P.forEach((p,j)=>{p.y0=y;p.h=hs[j];const y0=y,yy=v=>y0+p.h*(1-(v-p.lo)/(p.hi-p.lo));p.yy=yy;
 g.strokeStyle=ln;g.lineWidth=1;ticks.forEach(d=>{const X=x(d);g.beginPath();g.moveTo(X,y);g.lineTo(X,y+p.h);g.stroke()});
 const mid=(p.lo+p.hi)/2,ys=[p.lo,mid,p.hi];if(p.lo<0&&p.hi>0&&Math.abs(mid)>(p.hi-p.lo)*.08)ys.push(0);
 g.fillStyle=mut;g.textAlign='right';ys.forEach(v=>{g.beginPath();g.moveTo(X0,yy(v));g.lineTo(X1,yy(v));g.strokeStyle=Math.abs(v)<1e-9?mut:ln;g.stroke();g.fillText(nf(v),X0-4,Math.min(y+p.h-2,Math.max(y+10,yy(v)+4)))});
-g.strokeStyle=ln;g.strokeRect(X0,y,X1-X0,p.h);g.textAlign='left';g.fillText(p.t,X0+6,y+12);y+=p.h+gap});
+g.strokeStyle=ln;g.strokeRect(X0,y,X1-X0,p.h);y+=p.h+gap});
 const clip=p=>{g.save();g.beginPath();g.rect(X0,p.y0,X1-X0,p.h);g.clip()},NP=Math.ceil(X1-X0);
 const tr=(p,f,c,lw)=>{g.beginPath();for(let j=0;j<=NP;j++){const Y=p.yy(f((A+span*j/NP)*D));j?g.lineTo(X0+j,Y):g.moveTo(X0,Y)}g.strokeStyle=c;g.lineWidth=lw;g.stroke()};
 clip(P[0]);if(topo=='f3')for(let k=0;k<6;k++)tr(P[0],t=>Vm*o.u(k,t),ln,1);
 if(o.ph==1)tr(P[0],t=>Vm*Math.sin(t),pc[0],2);else for(let k=0;k<3;k++)tr(P[0],t=>Vm*Math.sin(t-2*PI*k/3),pc[k],2);g.restore();
 const arr=(p,a,c,mean,lb)=>{clip(p);g.beginPath();let f=1,lx=X0;for(let i=i0;i<=i1;i+=sd){lx=x(i/Q);const Y=p.yy(a[mod(i,M)]);f?g.moveTo(lx,Y):g.lineTo(lx,Y);f=0}
 g.strokeStyle=c;g.lineWidth=2;g.stroke();g.lineTo(lx,p.yy(0));g.lineTo(x(i0/Q),p.yy(0));g.closePath();g.globalAlpha=.15;g.fillStyle=c;g.fill();g.globalAlpha=1;
-g.setLineDash([5,4]);g.strokeStyle=mut;g.lineWidth=1.2;g.beginPath();g.moveTo(X0,p.yy(mean));g.lineTo(X1,p.yy(mean));g.stroke();g.setLineDash([]);g.fillStyle=mut;g.textAlign='right';g.fillText(lb,X1-4,p.yy(mean)-4);g.restore()};
+g.setLineDash([5,4]);g.strokeStyle=mut;g.lineWidth=1.2;g.beginPath();g.moveTo(X0,p.yy(mean));g.lineTo(X1,p.yy(mean));g.stroke();g.setLineDash([]);lab(lb,X1-4,p.yy(mean)-4,'right');g.restore()};
 arr(P[1],res.vo,ac,res.vdc,'Vdc = '+res.vdc.toFixed(1));arr(P[2],res.io,col('--io'),res.idc,'Idc = '+res.idc.toFixed(2));
+P.forEach(p=>lab(p.t,X0+6,p.y0+12,'left'));
 if(thy)res.fi.forEach(f=>{const b=f/Q;for(let n=Math.ceil((A-b)/360);b+360*n<=B;n++){const X=x(b+360*n);g.beginPath();g.moveTo(X,6);g.lineTo(X,y-gap);g.strokeStyle=ac;g.globalAlpha=.4;g.lineWidth=1;g.setLineDash([5,4]);g.stroke();g.setLineDash([]);g.globalAlpha=1}});
 const sy=y,pal=[...pc,col('--io'),ac,mut];g.strokeStyle=ln;g.lineWidth=1;g.strokeRect(X0,sy,X1-X0,strip);
 let s0=i0;for(let i=i0+1;i<=i1+1;i++)if(i>i1||res.sk[mod(i,M)]!==res.sk[mod(s0,M)]){const k=res.sk[mod(s0,M)];if(k>=0){const xa=Math.max(X0,x(s0/Q)),xb=Math.min(X1,x(Math.min(i,i1)/Q));if(xb>xa){g.fillStyle=pal[k%pal.length];g.globalAlpha=.75;g.fillRect(xa,sy,xb-xa,strip);g.globalAlpha=1;if(xb-xa>34){g.fillStyle='#fff';g.textAlign='center';g.fillText(o.on[k].map(q=>pre+q).join(','),(xa+xb)/2,sy+19)}}}s0=i}
 g.fillStyle=mut;g.textAlign='right';g.fillText('on',X0-4,sy+19);g.textAlign='center';ticks.forEach(d=>g.fillText(d+'°',x(d),sy+strip+14));
 const m=Math.round(cur*Q)%M,k=res.sk[m];
-for(let n=Math.ceil((A-cur)/360);cur+360*n<=B;n++){const X=x(cur+360*n);g.strokeStyle=fg;g.lineWidth=1.2;g.beginPath();g.moveTo(X,6);g.lineTo(X,sy+strip);g.stroke();g.fillStyle=ac;[[1,res.vo[m]],[2,res.io[m]]].forEach(q=>{const p=P[q[0]],Y=p.yy(q[1]);if(Y>=p.y0&&Y<=p.y0+p.h){g.beginPath();g.arc(X,Y,4,0,7);g.fill()}})}
+{const n=(cur>=A&&cur<=B)?0:Math.ceil((A-cur)/360);if(cur+360*n<=B){const X=x(cur+360*n);g.strokeStyle=fg;g.lineWidth=1.2;g.beginPath();g.moveTo(X,6);g.lineTo(X,sy+strip);g.stroke();g.fillStyle=ac;[[1,res.vo[m]],[2,res.io[m]]].forEach(q=>{const p=P[q[0]],Y=p.yy(q[1]);if(Y>=p.y0&&Y<=p.y0+p.h){g.beginPath();g.arc(X,Y,4,0,7);g.fill()}})}}
 $('#ro').textContent=`ωt = ${cur.toFixed(0)}°   vo = ${res.vo[m].toFixed(1)} V   io = ${res.io[m].toFixed(2)} A   conducting: ${k>=0?o.on[k].map(i=>pre+i).join(' + '):'none'}`;
 $('#vw').textContent=`view ${A.toFixed(0)}° to ${B.toFixed(0)}°  (span ${span.toFixed(0)}°)`}
 // UI
 $('#tabs').innerHTML=Object.keys(T).map(k=>`<button data-k="${k}">${T[k].t}</button>`).join('');
 $('#tabs').onclick=e=>{const k=e.target.dataset.k;if(!k)return;topo=k;ui()};
 function ui(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k==topo));$('#bd').classList.toggle('on',!thy);$('#bt').classList.toggle('on',thy);$('#al').disabled=!thy;schem();upd();sim()}
-function upd(){[['al','°'],['vm',' V'],['r',' Ω'],['l',' mH']].forEach(p=>$('#'+p[0]).nextElementSibling.textContent=$('#'+p[0]).value+p[1])}
-['al','vm','r','l'].forEach(i=>$('#'+i).oninput=()=>{upd();sim()});
+function upd(){[['al','°'],['vm',' V'],['r',' Ω'],['l',' mH'],['e',' V']].forEach(p=>$('#'+p[0]).nextElementSibling.textContent=$('#'+p[0]).value+p[1])}
+['al','vm','r','l','e'].forEach(i=>$('#'+i).oninput=()=>{upd();sim()});
 $('#bd').onclick=()=>{thy=false;ui()};$('#bt').onclick=()=>{thy=true;ui()};
-$('#pr').onclick=()=>{$('#l').value=0;upd();sim()};$('#pl').onclick=()=>{$('#l').value=1000;upd();sim()};
+const pre=o=>{Object.keys(o).forEach(k=>{if(k=='thy'){thy=o[k]}else $('#'+k).value=o[k]});ui()};
+$('#pr').onclick=()=>pre({l:0,e:0});$('#pl').onclick=()=>pre({l:1000,e:0});$('#pc').onclick=()=>pre({e:150,l:50});
+$('#pv').onclick=()=>{const g=IDEAL(topo,+$('#vm').value,120);pre({thy:true,al:120,l:1000,r:10,e:-Math.max(50,Math.round(1.3*Math.abs(g)/5)*5)})};
+const TH=['auto','light','dark'];let ti=0;$('#th').onclick=()=>{ti=(ti+1)%3;const v=TH[ti],R=document.documentElement;v=='auto'?R.removeAttribute('data-theme'):R.setAttribute('data-theme',v);$('#th').textContent='Theme: '+v;dirty=true};
+$('#cv').onkeydown=e=>{const k=e.key,sp=view.b-view.a;if(k=='+'||k=='=')zoom(.6,mid());else if(k=='-')zoom(1/.6,mid());else if(k=='ArrowLeft'){view.a-=sp*.1;view.b-=sp*.1}else if(k=='ArrowRight'){view.a+=sp*.1;view.b+=sp*.1}else if(k=='0')view={a:0,b:360};else return;e.preventDefault();dirty=true};
 $('#pp').onclick=()=>{play=!play;$('#pp').textContent=play?'Pause':'Play'};
 $('#sc').oninput=e=>{cur=+e.target.value;play=false;$('#pp').textContent='Play';const sp=view.b-view.a;let vis=false;for(let n=-3;n<=3;n++){const c=cur+360*n;if(c>=view.a&&c<=view.b)vis=true}if(!vis){view.a=cur-sp/2;view.b=view.a+sp}dirty=true};
 const MINS=5,MAXS=720,degAt=px=>{const{X0,X1}=geom();return view.a+(px-X0)/(X1-X0)*(view.b-view.a)};

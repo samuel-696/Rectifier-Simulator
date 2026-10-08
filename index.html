@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive diode and thyristor rectifier simulator: 1-phase and 3-phase, half-wave and full-wave, with schematics and waveforms."><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rectifier Lab</title>
 <link rel="stylesheet" href="style.css"></head>
 <body>
 <div class="wrap">
-<h1>Rectifier Lab</h1><p class="sub">Diode and thyristor rectifiers, 1&phi; and 3&phi;, half and full wave, with an R-L load. 50 Hz, ideal devices, steady-state time-domain simulation.</p>
+<div class="top"><div><h1>Rectifier Lab</h1><p class="sub">Diode and thyristor rectifiers, 1&phi; and 3&phi;, half and full wave, with an R-L load. 50 Hz, ideal devices, steady-state time-domain simulation.</p></div><button id="th" class="sm">Theme: auto</button></div>
 <div class="tabs" id="tabs"></div>
 <div class="grid">
 <div class="col">
 <div class="card"><h2>Schematic</h2><div id="sch"></div><p class="info" id="info"></p><p class="info"><b style="color:var(--ac)">Orange</b> = path carrying current right now; moving dashes show the current direction. Drag the slider or press Play.</p></div>
 <div class="card"><h2>Parameters</h2>
 <div class="tabs" style="margin-bottom:4px"><button id="bd">Diode</button><button id="bt" class="on">Thyristor</button></div>
-<div class="row"><label>Firing &alpha;</label><input type="range" id="al" min="0" max="180" step="1" value="30"><output></output></div>
-<div class="row"><label>Vm (phase pk)</label><input type="range" id="vm" min="50" max="600" step="5" value="325"><output></output></div>
-<div class="row"><label>R</label><input type="range" id="r" min="1" max="100" step="1" value="10"><output></output></div>
-<div class="row"><label>L</label><input type="range" id="l" min="0" max="1000" step="5" value="50"><output></output></div>
-<div class="tabs"><button id="pr">R load (L=0)</button><button id="pl">Highly inductive</button></div></div>
+<div class="row"><label for="al">Firing &alpha;</label><input type="range" id="al" min="0" max="180" step="1" value="30"><output></output></div>
+<div class="row"><label for="vm">Vm (phase pk)</label><input type="range" id="vm" min="50" max="600" step="5" value="325"><output></output></div>
+<div class="row"><label for="r">R</label><input type="range" id="r" min="1" max="100" step="1" value="10"><output></output></div>
+<div class="row"><label for="l">L</label><input type="range" id="l" min="0" max="1000" step="5" value="50"><output></output></div><div class="row"><label for="e">Load EMF E</label><input type="range" id="e" min="-600" max="600" step="5" value="0"><output></output></div>
+<div class="tabs"><button id="pr" class="sm">R load (L=0)</button><button id="pl" class="sm">Highly inductive</button><button id="pc" class="sm">Battery charger</button><button id="pv" class="sm">Inverter mode</button></div><p class="info">Load = R + L + E in series. E&gt;0 opposes the current (battery charger); E&lt;0 drives it (regenerating DC machine), which is what allows inverter operation for &alpha;&gt;90&deg;.</p></div>
 <div class="card"><h2>Steady-state metrics</h2><div class="m" id="mt"></div></div>
 </div>
-<div class="card"><h2>Waveforms</h2><div class="tb"><button id="zi" title="Zoom in">+</button><button id="zo" title="Zoom out">&minus;</button><button id="vl" title="Pan left">&#9664;</button><button id="vr" title="Pan right">&#9654;</button><button id="zr">Reset</button><label><input type="checkbox" id="fy"> Auto-fit Y</label><span id="vw"></span></div><canvas id="cv"></canvas><p class="hint">Scroll to zoom, drag to pan, double-click to reset. All graphs share one time axis. Zoom out past 360&deg; to see repeated cycles.</p>
+<div class="card"><h2>Waveforms</h2><div class="tb"><button id="zi" title="Zoom in">+</button><button id="zo" title="Zoom out">&minus;</button><button id="vl" title="Pan left">&#9664;</button><button id="vr" title="Pan right">&#9654;</button><button id="zr">Reset</button><label><input type="checkbox" id="fy"> Auto-fit Y</label><span id="vw"></span></div><canvas id="cv" tabindex="0" role="img" aria-label="Source voltage, output voltage, load current and device conduction waveforms. Keys: plus/minus zoom, arrows pan, 0 resets."></canvas><p class="hint">Scroll to zoom, drag to pan, double-click to reset. All graphs share one time axis. Zoom out past 360&deg; to see repeated cycles.</p>
 <div class="ctl"><button id="pp">Pause</button><input type="range" id="sc" min="0" max="360" step="1" value="0"></div><div id="ro"></div></div>
 </div></div>
+<p class="foot">Ideal devices and source: no source inductance, commutation overlap or device drops. Thyristors use a wide gate pulse, so they fire when first forward-biased after &alpha;. 50 Hz.</p>
+<noscript>This app needs JavaScript.</noscript>
 <script src="app.js"></script>
 </body></html>

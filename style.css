@@ -33,3 +33,7 @@ canvas{width:100%;display:block}
 .tb label{display:flex;gap:4px;align-items:center;cursor:pointer}.tb span{color:var(--mut);font-size:12px;margin-left:auto}
 #cv{cursor:grab;touch-action:pan-y}#cv:active{cursor:grabbing}
 .hint{color:var(--mut);font-size:12px;margin:6px 0 0}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.tabs button.sm{font-size:12px;padding:5px 9px}
+.foot{color:var(--mut);font-size:12px;margin:14px 0 4px;text-align:center}
+#cv:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
