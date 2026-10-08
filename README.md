@@ -14,10 +14,6 @@ Interactive diode / thyristor rectifier simulator with schematics and waveforms.
 ## Run locally
 Open `index.html` in a browser (or `python3 -m http.server`, then http://localhost:8000).
 
-## Deploy on GitHub Pages
-1. Push `index.html`, `style.css`, `app.js` and `.nojekyll` to the root of the `main` branch.
-2. Repo -> Settings -> Pages -> Source: "Deploy from a branch" -> `main` / `(root)` -> Save.
-3. Live after about a minute at `https://<username>.github.io/<repo>/`.
 
 ## Model assumptions
 Ideal devices and source, 50 Hz, no source inductance or commutation overlap, no device drops.
