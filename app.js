@@ -5,7 +5,7 @@ f1:{t:'1φ full-wave (bridge)',N:2,p:2,sp:180,p0:0,ph:1,u:(k,t)=>k?-Math.sin(t):
 h3:{t:'3φ half-wave',N:3,p:3,sp:120,p0:30,ph:3,u:(k,t)=>Math.sin(t-2*PI*k/3),on:[['1'],['2'],['3']],fl:k=>{const x=70+70*k;return `M${x} 145V50H340V95M340 165V215H${x}V175`},info:'Three pulses per cycle; each device conducts up to 120°. Natural firing point is 30° after the phase zero-crossing. CCM: Vdc = (3√3·Vm/2π)cosα.'},
 f3:{t:'3φ full-wave (6-pulse bridge)',N:6,p:6,sp:60,p0:30,ph:3,u:(k,t)=>SQ*Math.sin(t+PI/6-PI*k/3),on:[['1','6'],['1','2'],['3','2'],['3','4'],['5','4'],['5','6']],fl:k=>{const p='aabbcc'[k],n='bcca ab'.replace(' ','')[k];return F3.o[p]+`V30H370V115M370 185V270H${F3.x[n]}V${F3.y[n]}`+F3.i[n]},info:'Six pulses per cycle, output follows the line-line voltage envelope (grey). CCM: Vdc = (3√3·Vm/π)cosα ≈ 1.654·Vm·cosα. Each pair conducts 60° (CCM).'}};
 const F3={o:{a:'M60 150H150',b:'M60 128H145q5-9 10 0H220',c:'M60 106H145q5-9 10 0H215q5-9 10 0H290'},i:{a:'H60',b:'H155q-5-9 -10 0H60',c:'H225q-5-9 -10 0H155q-5-9 -10 0H60'},x:{a:150,b:220,c:290},y:{a:150,b:128,c:106}};
-const Q=8,mod=(i,n)=>((i%n)+n)%n;let view={a:0,b:360},fitY=false;
+const Q=8,mod=(i,n)=>((i%n)+n)%n;let view={a:0,b:360},fitY=false,mode='';
 let topo='f3',thy=true,res,cur=0,play=true,dirty=true;
 const wp=d=>`<path class="w" d="${d}"/>`;
 const sc=(x,y,l,id)=>`<circle class="w hb" id="${id}" cx="${x}" cy="${y}" r="15" fill="var(--card)"/><path class="w" d="M${x-8} ${y}q4-9 8 0t8 0"/><text class="t" x="${x}" y="${y+28}" text-anchor="middle">${l}</text>`;
@@ -19,21 +19,22 @@ if(topo=='f3')s=`<svg viewBox="0 0 420 290">${wp('M150 30V270M220 30V270M290 30V
 s=s.replace(/(<svg[^>]*>)(<path[^>]*\/>)/,'$1$2<g id="fg"></g>');$('#sch').innerHTML=s;$('#info').textContent=T[topo].info}
 const IDEAL=(t,V,a)=>{const c=Math.cos(a*D);return{h1:V*(1+c)/(2*PI),f1:2*V/PI*c,h3:3*SQ*V/(2*PI)*c,f3:3*SQ*V/PI*c}[t]};
 const RLOAD=(t,V,a)=>{const c=Math.cos(a*D);return{h1:V*(1+c)/(2*PI),f1:V*(1+c)/PI,h3:a>=150?0:a<=30?3*SQ*V/(2*PI)*c:3*V/(2*PI)*(1+Math.cos((a+30)*D)),f3:a>=120?0:a<=60?3*SQ*V/PI*c:3*SQ*V/PI*(1+Math.cos((a+60)*D))}[t]};
-function sim(){const o=T[topo],Vm=+$('#vm').value,R=+$('#r').value,L=+$('#l').value/1000,E=+$('#e').value,al=thy?+$('#al').value:0,M=360*Q,C=100,dt=1/(M*50),a=L>1e-7?Math.exp(-R*dt/L):0,W=Math.min(o.sp,180)*Q;
+function sim(){const o=T[topo],Vm=+$('#vm').value,R=+$('#r').value,L=+$('#l').value/1000,E=+$('#e').value,al=thy?+$('#al').value:0,M=360*Q,dt=1/(M*50),a=L>1e-7?Math.exp(-R*dt/L):0,W=Math.min(o.sp,180)*Q;
 const fi=[];for(let k=0;k<o.N;k++)fi.push(Math.round(((o.p0+al+o.sp*k)%360)*Q)%M);
 const g0=IDEAL(topo,Vm,al);let st=-1,i=0;
 if(L>1e-6&&(g0-E)/R>0){i=(g0-E)/R;let b=-1e9;for(let k=0;k<o.N;k++){const u=o.u(k,0);if(u>b){b=u;st=k}}}
 const vo=new Float32Array(M),io=new Float32Array(M),sk=new Int8Array(M);
-for(let n=1;n<=M*C;n++){const m=n%M,t=m/Q*D;
+let acc=0,prev=1e9,cy=0;for(let n=1;n<=M*400;n++){const m=n%M,t=m/Q*D;
 for(let k=0;k<o.N;k++)if(st!==k&&(!thy||mod(m-fi[k],M)<W)){const uc=st<0?E:Vm*o.u(st,t);if(Vm*o.u(k,t)>=uc-1e-7)st=k}
-let v=E;if(st>=0){const u=Vm*o.u(st,t),e=(u-E)/R;i=e+(i-e)*a;if(i<-1e-9){i=0;st=-1}else{if(i<0)i=0;v=u}}
-if(n>M*(C-1)){vo[m]=v;io[m]=i;sk[m]=st}}
+let v=E;if(st>=0){const u=Vm*o.u(st,t),um=Vm*o.u(st,t-.5/Q*D),e=(um-E)/R;i=e+(i-e)*a;if(i<-1e-9){i=0;st=-1}else{if(i<0)i=0;v=u}}
+vo[m]=v;io[m]=i;sk[m]=st;acc+=i;if(m===0){const cm=acc/M;if(++cy>=4&&Math.abs(cm-prev)<=1e-5*Math.max(1,Math.abs(cm)))break;prev=cm;acc=0}}
 const mean=f=>f.reduce((q,x)=>q+x,0)/M,rms=f=>Math.sqrt(f.reduce((q,x)=>q+x*x,0)/M);
 const vdc=mean(vo),vr=rms(vo),idc=mean(io),ir=rms(io),dcm=sk.some(x=>x<0);
 const th=!dcm?(o.p>1?IDEAL(topo,Vm,al):null):(L<1e-6&&E==0?RLOAD(topo,Vm,al):null);
 res={vo,io,sk,fi,Vm,E,al,vdc,vr,idc,ir,dcm,th};
 const f=(x,u,d=1)=>isFinite(x)?x.toFixed(d)+' '+u:'—',ok=Math.abs(vdc)>1e-3,rf=ok?Math.sqrt(Math.max(0,(vr/vdc)**2-1)):NaN;
 const mm=[['Vdc',f(vdc,'V')],['Vrms',f(vr,'V')],['Idc',f(idc,'A',2)],['Irms',f(ir,'A',2)],['Form factor Vrms/Vdc',ok?(vr/vdc).toFixed(3):'—'],['Ripple factor',ok?rf.toFixed(3):'—'],['Pdc = Vdc·Idc',f(vdc*idc,'W',0)],['Ripple frequency',o.p*50+' Hz'],['Conduction',dcm?'Discontinuous':'Continuous'],['Textbook Vdc'+(th==null?'':!dcm?' (CCM)':' (R load)'),th==null?'—':f(th,'V')]];
+$('#st').textContent=Math.max(...io)<1e-6?'No current flows: with these settings no device is ever forward-biased while it is gated (E too high, or α too large for this load). Lower E or α, or raise Vm.':'';
 $('#mt').innerHTML=mm.map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');dirty=true}
 function hl(){document.querySelectorAll('.d.on,.hb.on').forEach(e=>e.classList.remove('on'));const o=T[topo],fg=$('#fg'),k=res.sk[Math.round(cur*Q)%(360*Q)];fg.innerHTML='';if(k<0)return;
 fg.innerHTML=[].concat(o.fl(k)).map(d=>`<path class="fl" d="${d}"/>`).join('');
@@ -81,14 +82,15 @@ $('#ro').textContent=`ωt = ${cur.toFixed(0)}°   vo = ${res.vo[m].toFixed(1)} V
 $('#vw').textContent=`view ${A.toFixed(0)}° to ${B.toFixed(0)}°  (span ${span.toFixed(0)}°)`}
 // UI
 $('#tabs').innerHTML=Object.keys(T).map(k=>`<button data-k="${k}">${T[k].t}</button>`).join('');
-$('#tabs').onclick=e=>{const k=e.target.dataset.k;if(!k)return;topo=k;ui()};
-function ui(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k==topo));$('#bd').classList.toggle('on',!thy);$('#bt').classList.toggle('on',thy);$('#al').disabled=!thy;schem();upd();sim()}
+$('#tabs').onclick=e=>{const k=e.target.dataset.k;if(!k)return;topo=k;mode=='v'?apply('v'):ui()};
+function ui(){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k==topo));$('#bd').classList.toggle('on',!thy);$('#bt').classList.toggle('on',thy);$('#al').disabled=!thy;schem();upd();sim();document.querySelectorAll('.pb').forEach(b=>b.classList.toggle('on',b.dataset.m==mode));draw();hl();dirty=false}
 function upd(){[['al','°'],['vm',' V'],['r',' Ω'],['l',' mH'],['e',' V']].forEach(p=>$('#'+p[0]).nextElementSibling.textContent=$('#'+p[0]).value+p[1])}
-['al','vm','r','l','e'].forEach(i=>$('#'+i).oninput=()=>{upd();sim()});
-$('#bd').onclick=()=>{thy=false;ui()};$('#bt').onclick=()=>{thy=true;ui()};
-const pre=o=>{Object.keys(o).forEach(k=>{if(k=='thy'){thy=o[k]}else $('#'+k).value=o[k]});ui()};
-$('#pr').onclick=()=>pre({l:0,e:0});$('#pl').onclick=()=>pre({l:1000,e:0});$('#pc').onclick=()=>pre({e:150,l:50});
-$('#pv').onclick=()=>{const g=IDEAL(topo,+$('#vm').value,120);pre({thy:true,al:120,l:1000,r:10,e:-Math.max(50,Math.round(1.3*Math.abs(g)/5)*5)})};
+['al','vm','r','l','e'].forEach(i=>$('#'+i).oninput=()=>{if(mode=='v'&&i=='vm')$('#e').value=PRE.v().e;else if(mode){mode='';document.querySelectorAll('.pb').forEach(b=>b.classList.remove('on'))}upd();sim()});
+$('#bd').onclick=()=>{thy=false;mode='';ui()};$('#bt').onclick=()=>{thy=true;pt=true;ui()};
+const PRE={r:()=>({thy:thy,al:30,r:10,l:0,e:0}),l:()=>({thy:thy,al:30,r:10,l:1000,e:0}),c:()=>({thy:thy,al:30,r:10,l:50,e:150}),
+v:()=>{const g=IDEAL(topo,+$('#vm').value,120);return{thy:true,al:120,r:10,l:1000,e:-Math.max(50,Math.round(1.3*Math.abs(g)/5)*5)}}};
+let pt=true;function apply(m){if(m=='v'&&mode!='v')pt=thy;else if(m!='v'&&mode=='v')thy=pt;mode=m;const p=PRE[m]();Object.keys(p).forEach(k=>{if(k=='thy')thy=p[k];else $('#'+k).value=p[k]});ui()}
+document.querySelectorAll('.pb').forEach(b=>b.onclick=()=>apply(b.dataset.m));
 const TH=['auto','light','dark'];let ti=0;$('#th').onclick=()=>{ti=(ti+1)%3;const v=TH[ti],R=document.documentElement;v=='auto'?R.removeAttribute('data-theme'):R.setAttribute('data-theme',v);$('#th').textContent='Theme: '+v;dirty=true};
 $('#cv').onkeydown=e=>{const k=e.key,sp=view.b-view.a;if(k=='+'||k=='=')zoom(.6,mid());else if(k=='-')zoom(1/.6,mid());else if(k=='ArrowLeft'){view.a-=sp*.1;view.b-=sp*.1}else if(k=='ArrowRight'){view.a+=sp*.1;view.b+=sp*.1}else if(k=='0')view={a:0,b:360};else return;e.preventDefault();dirty=true};
 $('#pp').onclick=()=>{play=!play;$('#pp').textContent=play?'Pause':'Play'};

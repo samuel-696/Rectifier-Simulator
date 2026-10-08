@@ -37,3 +37,6 @@ canvas{width:100%;display:block}
 .tabs button.sm{font-size:12px;padding:5px 9px}
 .foot{color:var(--mut);font-size:12px;margin:14px 0 4px;text-align:center}
 #cv:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+.warn{color:var(--ac);font-weight:600}
+.top .sub:not(.credit){margin-bottom:2px}.credit{margin:0 0 12px;color:var(--fg);font-weight:600}
+#th{white-space:nowrap;flex:none}
